@@ -34,37 +34,38 @@ function vis_train(
     t0 = time()
 
     local x, min_err
-    min_err = typemax(eltype(θ)) #dummy variables
+    min_err = typemax(eltype(θ)) # dummy variables
     min_opt = 1
 
-    anim = @animate for (i, d) in enumerate(data)
+    anim = @animate for (i, d) in enumerate(data) # Iterator that yields (i, d) where i is a counter starting at 1, 
+                                                  # and d is the d-th value from dataset 
+        # calculate gradients of loss function
+        # gradient() requires two args: f and params                                       
         gs = Flux.Zygote.gradient(ps) do
             x = loss(θ, d...)
             first(x)
         end
         cb_call = cb(θ, x...)
         if !(typeof(cb_call) <: Bool)
-            error("The callback should return a boolean `halt` for whether to stop the optimization process. Please see the sciml_train documentation for information.")
-        elseif cb_call
+            error("The callback function should return a boolean to decide whether stopping the optimization process.")
+        elseif cb_call # stop
             break
         end
-        msg = @sprintf("loss: %.3g", x[1])
-        #progress && ProgressLogging.@logprogress msg i/maxiters
-        DiffEqFlux.update!(opt, ps, gs)
 
+        DiffEqFlux.update!(opt, ps, gs)
         if save_best
-            if first(x) < first(min_err)  #found a better solution
+            if first(x) < first(min_err) # we've found a better solution
                 min_opt = opt
                 min_err = x
             end
-            if i == maxiters  #Last iteration, revert to best.
+            if i == maxiters  # for last iteration, revert to best
                 opt = min_opt
                 cb(θ, min_err...)
             end
         end
     end
 
-    _time = time()
+    t1 = time()
 
     res = Optim.MultivariateOptimizationResults(
         opt,
@@ -74,18 +75,18 @@ function vis_train(
         maxiters, # iteration,
         maxiters >= maxiters, # iteration == options.iterations,
         false, # x_converged,
-        0.0,# T(options.x_tol),
-        0.0,# T(options.x_tol),
-        NaN,# x_abschange(state),
-        NaN,# x_abschange(state),
-        false,# f_converged,
-        0.0,# T(options.f_tol),
-        0.0,# T(options.f_tol),
-        NaN,# f_abschange(d, state),
-        NaN,# f_abschange(d, state),
-        false,# g_converged,
-        0.0,# T(options.g_tol),
-        NaN,# g_residual(d),
+        0.0, # T(options.x_tol),
+        0.0, # T(options.x_tol),
+        NaN, # x_abschange(state),
+        NaN, # x_abschange(state),
+        false, # f_converged,
+        0.0, # T(options.f_tol),
+        0.0, # T(options.f_tol),
+        NaN, # f_abschange(d, state),
+        NaN, # f_abschange(d, state),
+        false, # g_converged,
+        0.0, # T(options.g_tol),
+        NaN, # g_residual(d),
         false, # f_increased,
         nothing,
         maxiters,
@@ -93,7 +94,7 @@ function vis_train(
         0,
         true,
         NaN,
-        _time - t0,
+        t1 - t0,
     )
 
     return res, anim

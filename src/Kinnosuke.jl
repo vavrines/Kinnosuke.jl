@@ -4,10 +4,8 @@
 
 module Kinnosuke
 
-using Flux
-using Plots
-using FileIO
-using JLD2
+using OrdinaryDiffEq, Flux, DiffEqFlux, Optim
+using FileIO, JLD2, Plots
 
 include("widget.jl")
 include("train.jl")
