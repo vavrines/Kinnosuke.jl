@@ -12,7 +12,7 @@ include("diff.jl")
 include("widget.jl")
 include("train.jl")
 
-export central_diff, upwind_diff
+export central_diff, central_diff!, upwind_diff, upwind_diff!
 export track
 export vis_train
 
