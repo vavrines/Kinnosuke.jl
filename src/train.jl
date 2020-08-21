@@ -2,11 +2,10 @@ struct NullData end
 const DEFAULT_DATA = Iterators.cycle((NullData(),))
 
 
-```
+"""
 Interactive training with solution animation
 
-```
-
+"""
 function vis_train(
     loss,
     _θ,
